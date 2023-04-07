@@ -1,4 +1,5 @@
 ### Architecture
+
 Add scripts or event hooks to the `/scripts/` folder. These should export an
 object with two keys:
 + `trigger`, which is the
@@ -7,6 +8,14 @@ object with two keys:
 + `execute`, which is a function that takes in a `client` and returns a event
   handler function. For a barebones example of this, check out
   [logged-in.js](./scripts/logged-in.js).
+
+Add cron jobs to the `/cron/` folder. These should export the following keys:
++ `schedule`, which is a [cron-formatted string](https://crontab.guru/).
++ `timezone`, which is the [english-named
+  timezone](https://code2care.org/pages/java-timezone-list-utc-gmt-offset) like
+  `America/New_York`.
++ `execute`, which is a function that takes in a `client` and returns a
+  function to be run on a cron schedule.
 
 ### Local Development
 1. Create your own bot using the [the discord developer portal](https://discord.com/developers/applications).
