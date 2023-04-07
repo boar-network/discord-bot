@@ -1,10 +1,10 @@
 const EventEmitter = require("events")
-
-let brainLock = false
-const emitter = new EventEmitter()
-const fs = require("fs")
+const fs = require("fs-extra")
 
 const storageFilePath = "data/storage.json"
+const emitter = new EventEmitter()
+
+let brainLock = false
 
 module.exports = {
   async read(key) {
@@ -13,8 +13,11 @@ module.exports = {
     }
     brainLock = true
 
-    const data = await fs.promises.readFile(storageFilePath)
-    const value = JSON.parse(data.toString())[key]
+    ensureFileExists(storageFilePath)
+
+    const data = fs.readJSONSync(storageFilePath)
+
+    const value = data[key]
 
     brainLock = false
     emitter.emit("unlocked")
@@ -26,12 +29,23 @@ module.exports = {
     }
     brainLock = true
 
-    const data = await fs.promises.readFile(storageFilePath)
-    let brain = JSON.parse(data.toString())
-    brain[key] = val
-    await fs.promises.writeFile(storageFilePath, JSON.stringify(brain, null, 2))
+    ensureFileExists(storageFilePath)
+
+    const data = fs.readJSONSync(storageFilePath)
+    data[key] = val
+
+    fs.writeJSONSync(storageFilePath, data, { spaces: 2 })
 
     brainLock = false
     emitter.emit("unlocked")
   },
+}
+
+function ensureFileExists(filePath) {
+  fs.ensureFileSync(filePath)
+
+  const data = fs.readFileSync(filePath)
+  if (data.length === 0) {
+    fs.writeJSONSync(filePath, {}, { spaces: 2 })
+  }
 }
