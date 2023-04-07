@@ -1,6 +1,7 @@
 const TOKEN = process.env.TOKEN
 
 const { Client, Intents } = require("discord.js")
+const CronJob = require("cron").CronJob
 const fs = require("fs")
 const path = require("path")
 
@@ -21,6 +22,23 @@ for (const file of scriptFiles) {
   const filePath = path.join(scriptsPath, file)
   const script = require(filePath)
   client.on(script.trigger, script.execute(client))
+}
+
+const cronPath = path.join(__dirname, "cron")
+const cronFiles = fs
+  .readdirSync(cronPath)
+  .filter((file) => file.endsWith(".js"))
+for (const file of cronFiles) {
+  const filePath = path.join(cronPath, file)
+  const cron = require(filePath)
+  const job = new CronJob(
+    cron.schedule,
+    cron.execute(client),
+    null,
+    true,
+    cron.timezone
+  )
+  job.start()
 }
 
 client.login(TOKEN)
