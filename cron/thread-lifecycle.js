@@ -44,7 +44,7 @@ function archiveThreadPrompt(client, thread) {
 
 module.exports = {
   schedule: "*/15 * * * *",
-  timezone: "America/New_York",
+  timezone: "Europe/Warsaw",
   execute(client) {
     return async () => {
       const guild = await client.guilds.fetch(GUILD)
