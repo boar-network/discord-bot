@@ -51,16 +51,21 @@ module.exports = {
       const channels = await guild.channels.fetch()
       const longRunningThreadIds = (await read("long-running-thread-ids")) || {}
       const archiveThreshold = weekdaysBefore(moment(), 4)
+
       channels
         .filter((channel) => channel.isText() && channel.viewable)
         .forEach(async (channel) => {
           const threads = await channel.threads.fetch()
           threads.threads.forEach(async (thread) => {
-            const messages = await thread.messages.fetch({ limit: 1 })
+            const lastMessage = await thread.messages.fetch(
+              thread.lastMessageId
+            )
+
             const lastActivity = Math.max(
-              (messages.first() && messages.first().createdTimestamp) || 0,
+              lastMessage?.createdTimestamp ?? 0,
               thread.archiveTimestamp
             )
+
             if (moment(lastActivity).isAfter(archiveThreshold)) {
               return
             }
