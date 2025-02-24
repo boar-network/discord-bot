@@ -61,8 +61,7 @@ module.exports = {
             try {
               lastMessage = await thread.messages.fetch(thread.lastMessageId)
             } catch (error) {
-              console.error(`Failed to fetch last message for thread ${thread.id}:`, error)
-              thread.messages.send("Failed to fetch last message.")
+              console.error(`Failed to fetch last message for thread ${thread.id}`)
               archiveThreadPrompt(client, thread)
               return
             }
