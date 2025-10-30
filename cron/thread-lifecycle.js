@@ -57,9 +57,14 @@ module.exports = {
         .forEach(async (channel) => {
           const threads = await channel.threads.fetch()
           threads.threads.forEach(async (thread) => {
-            const lastMessage = await thread.messages.fetch(
-              thread.lastMessageId
-            )
+            let lastMessage = null
+            try {
+              lastMessage = await thread.messages.fetch(thread.lastMessageId)
+            } catch (error) {
+              console.error(`Failed to fetch last message for thread ${thread.id}`)
+              archiveThreadPrompt(client, thread)
+              return
+            }
 
             const lastActivity = Math.max(
               lastMessage?.createdTimestamp ?? 0,
