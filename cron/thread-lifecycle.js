@@ -53,7 +53,7 @@ module.exports = {
       const archiveThreshold = weekdaysBefore(moment(), 4)
 
       channels
-        .filter((channel) => channel.isText() && channel.viewable)
+        .filter((channel) => channel && channel.isText() && channel.viewable)
         .forEach(async (channel) => {
           const threads = await channel.threads.fetch()
           threads.threads.forEach(async (thread) => {

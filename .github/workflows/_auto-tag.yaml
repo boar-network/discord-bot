@@ -1,0 +1,57 @@
+---
+name: Auto Tag
+
+on:
+  workflow_call:
+    outputs:
+      new_tag:
+        description: "The new tag"
+        value: ${{ jobs.tag.outputs.new_tag }}
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      new_tag: ${{ steps.tag.outputs.new_tag }}
+    steps:
+      - name: 🏧 Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: '0'
+
+      - name: 🚀 Bump version and push tag
+        uses: anothrNick/github-tag-action@1.75.0
+        id: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DRY_RUN: ${{ github.event_name == 'pull_request' }}
+
+      - name: 📤 Show outputs
+        run: |
+          echo "Tag: ${{ steps.tag.outputs.tag }}"
+          echo "New tag: ${{ steps.tag.outputs.new_tag }}"
+          echo "Part: ${{ steps.tag.outputs.part }}"
+
+      - name: 👀 Add comment to PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Auto Tag: after merging this PR, the new tag will be: ${{ steps.tag.outputs.new_tag }}
+
+            <details>
+            <summary>Details</summary>
+
+            Job: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Use in commit message to bump:
+            * `#patch` - v0.0.X -> v0.0.(X+1)
+            * `#minor` (default) - v0.X.0 -> v0.(X+1).0
+            * `#major` - vX.0.0 -> v(X+1).0.0
+
+            </details>
+          comment_tag: autotag
