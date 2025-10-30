@@ -1,0 +1,22 @@
+---
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  auto-tag:
+    uses: ./.github/workflows/_auto-tag.yaml
+    secrets: inherit
+
+  docker:
+    needs: [auto-tag]
+    uses: ./.github/workflows/_docker.yaml
+    secrets: inherit
+    with:
+      version: ${{ needs.auto-tag.outputs.new_tag }}
